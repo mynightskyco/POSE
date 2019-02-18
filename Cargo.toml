@@ -1,0 +1,7 @@
+[package]
+name = "POSE"
+version = "0.1.0"
+authors = ["Dylan Wagner <vstrideultimate@gmail.com>"]
+edition = "2018"
+
+[dependencies]
