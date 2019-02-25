@@ -14,7 +14,7 @@
   
   \section{Context}
   
-  This document will describe the aspects of the simulation software including: operation, orbital model including models of perturbing forces, concurrent parallel design, input and output, model of orbital collisions and simulation of spacecraft logic. 
+  This document will describe the aspects of the simulation software including: operation, orbital model including models of perturbing forces, concurrent parallel design, input and output, model of orbital collisions and simulation of spacecraft logic. Additional aspects related to stages of simulation development will also be provided.
   
   \section{Summary of Operation}
   
@@ -49,12 +49,52 @@
   
   \section{Equations of Perturbing Forces (X, Y, Z)}
   
-  \section{Concurrent Parallel Design}
+  \section{GPU Acceleration}
+  
+	Most calculations on bodies within the simulation will be accelerated by one or many graphic processing units. Calculations pertaining to the orbital perturbations will be at the heart of the shader program. It is important to note that not all calculations will be performed on the GPU but the bulk will. By using GPU acceleration, massive amount of orbital debris can be included into the simulation. Using GPU acceleration the simulation can scale by using multiple GPUs.
   
   \section{Input and Output}
+  
+The input and output to the simulation will consist of only text based files or streams. Below definitions for all input and output at all stages of the simulation are provided. 
+  
+  \subsection{Input at Start up}
+  
+  The simulation at startup needs some information pertaining the celestial environment. This information consists of the bodies which will be simulated. The bodies are ether debris or spacecraft; each needing additional attributes which define the object. Below attributes for both debris and spacecraft are listed:
+  
+  \paragraph{Debris}
+  \begin{itemize}
+  	\item X, Y, Z locations in the simulation space
+  	\item X, Y, Z initial velocity values
+  	\item Shape (Cube or Spheroid)
+  	\item Dimensions W, L, H
+  	\item Material (Eg: Aluminum or Aluminium oxide)
+  \end{itemize}
+  
+  \paragraph{"Dumb" Spacecraft}
+  \begin{itemize}
+  	\item X, Y, Z locations in the simulation space
+  	\item X, Y, Z initial velocity values
+  	\item Spacecraft Name
+  	\item Opt01: Shape (Cube or Spheroid)
+  	\item Opt01: Dimensions W, L, H
+  	\item Opt02: Spacecraft model file
+  \end{itemize}
+  
+  The objects read in at start up will be listed sequentially in a flat file using Javascript Object Notation (JSON).
+  
+  \subsection{Input at Simulation Run}
+  
+  \subsection{Output at Simulation Stop Condition}
+  
+  \subsection{Output at Simulation Run}
   
   \section{Model of Orbital Collisions}
   
   \section{Simulation of Spacecraft Logic}
+  
+  \section{Stages of Development}
+  
+  \section{Domain}
+  
   
 \end{document}
