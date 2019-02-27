@@ -48,13 +48,8 @@
   \end{itemize}
   
   
-  \section{GPU Acceleration}
-  
-Most calculations on bodies within the simulation will be accelerated by one or many graphic processing units. Calculations pertaining to the orbital perturbations will be at the heart of the shader program. It is important to note that not all calculations will be performed on the GPU but the bulk will. By using GPU acceleration, massive amount of orbital debris can be included into the simulation. Using GPU acceleration the simulation can scale by using multiple GPUs.
+  \section{Computational Parallel Structure}
 
-\bigskip
-\noindent
-Bindings for Vulkan devloped under the Vulkano project for the Rust language should be used for calculations on objects within the simulation. Vulkan provides a cross operating system graphics API implemented by common graphic processing unit vendors.
   
   \section{Input and Output}
   
@@ -108,7 +103,7 @@ The input and output to the simulation will consist of only text based files or 
   
   \paragraph{Simulation Summary}
   
-  \section{Environment}  
+  \section{Simulation Environment}  
   
   \subsection{Coordinate System}
   
