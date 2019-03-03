@@ -36,6 +36,8 @@
   
   The simulation software will use Cowell’s method. Cowell’s method involves adding together acceleration vectors acting on bodies in orbit. This summed acceleration vector can be separated in X, Y, Z components then integrated to find velocity with velocity being integrated to find spacial displacement. 
   
+  \subsection{Main Algorithm}
+  
   \section{Models of Perturbing Forces}
   
   \begin{itemize}
@@ -90,17 +92,6 @@ The input and output to the simulation will consist of only text based files or 
   
   \paragraph{Object Data}
   
-  The simulation will produce a comma separated value string file containing data ordered by location then time. The name of this output file is supplied by the user at simulation start. The format is provided below:
-  
-  \begin{verbatim}
-  	ID,Time,X,Y,Z,vX,vY,vZ
-  	
-  	ID - Integer value
-  	Time - String ISO Format (YYYYMMDDThh:mm:ss.sssZ)
-  	X,Y,Z - Double precision value in format "%.6f" with unit m
-  	vX,vY,vZ - Double precision value in format "%.6f" with unit m/s  	
-  	
-  \end{verbatim}
   
   \paragraph{Simulation Summary}
   
