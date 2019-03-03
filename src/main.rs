@@ -2,7 +2,7 @@
 extern crate serde_json;
 extern crate clap;
 
-mod input;
+mod innout;
 mod bodies;
 
 /// Checks if value passed in to program argument is numeric. Returns a Result 
@@ -52,5 +52,5 @@ fn main() {
         .get_matches();
 
     let inpt_file = matches.value_of("INPUT").unwrap(); // Will always have INPUT
-    input::load_inpt(inpt_file);
+    let sim_bodies = innout::parse_inpt(inpt_file);
 }

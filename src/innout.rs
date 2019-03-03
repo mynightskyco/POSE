@@ -5,7 +5,8 @@ use super::bodies;
 /// 
 /// # Argument
 /// * 'file' - The name of the input file containing the bodies
-pub fn load_inpt(file: &str) -> (){
+pub fn parse_inpt(file: &str) -> Vec<bodies::SimobjT>{
+    let sim_bodies: Vec<bodies::SimobjT> = Vec::new();
 
     // REMOVE THIS
     println!("{file}", file=file);
@@ -16,4 +17,6 @@ pub fn load_inpt(file: &str) -> (){
                               x_vel : 1f64,
                               y_vel : 1f64,
                               z_vel : 1f64};
+
+    return sim_bodies;
 }

@@ -1,4 +1,6 @@
 
+pub trait Simobj {}
+
 /// Struct for holding attributes relating to debris
 pub struct Debris{
     pub id: u32,
@@ -9,3 +11,7 @@ pub struct Debris{
     pub y_vel: f64,
     pub z_vel: f64
 }
+
+impl Simobj for Debris {}
+
+pub type SimobjT = Box<dyn Simobj>;
