@@ -3,7 +3,7 @@ use super::bodies;
 
 /// Main entry point into the init sequence
 /// 
-/// # Arguments
+/// # Argument
 /// * 'file' - The name of the input file containing the bodies
 pub fn load_inpt(file: &str) -> (){
 
