@@ -48,8 +48,9 @@
   \end{itemize}
   
   
-  \section{Computational Parallel Structure}
-
+  \section{GPU Acceleration}
+  
+Most calculations on bodies within the simulation will be accelerated by one or many graphic processing units. Calculations pertaining to the orbital perturbations will be at the heart of the shader program. It is important to note that not all calculations will be performed on the GPU but the bulk will. By using GPU acceleration, massive amount of orbital debris can be included into the simulation. Using GPU acceleration the simulation can scale by using multiple GPUs.
   
   \section{Input and Output}
   
@@ -63,7 +64,7 @@ The input and output to the simulation will consist of only text based files or 
   \begin{itemize}
   	\item ID (Unique)
   	\item X, Y, Z (Geocentric) locations in the simulation space
-  	\item X, Y, Z (Geocentric) initial velocity values
+  	\item vX, vY, vZ (Geocentric) initial velocity values
   	\item Shape (Cube or Spheroid)
   	\item Dimensions W, L, H
   	\item Material (Eg: Aluminum or Aluminium oxide)
@@ -75,7 +76,7 @@ The input and output to the simulation will consist of only text based files or 
     	\item Spacecraft Name
     	\item Orientation (\textalpha, \textbeta, \textgamma)
   	\item X, Y, Z (Geocentric) locations in the simulation space
-  	\item X, Y, Z (Geocentric) initial velocity values
+  	\item vX, vY, vZ (Geocentric) initial velocity values
   	\item Opt01a: Shape (Cube or Spheroid)
   	\item Opt01a: Dimensions W, L, H
   	\item Opt02b: Spacecraft model file
