@@ -54,9 +54,9 @@ fn read_object_from_file<P: AsRef<Path>>(path: P) -> Result<Vec<Debris>, Box<Err
     let file = File::open(path)?;
     let reader = BufReader::new(file);
 
-    // Read the JSON contents of the file as an instance of `User`.
+    // Read the JSON contents of the file as an instance of `Debris`.
     let u = serde_json::from_reader(reader)?;
 
-    // Return the `User`.
+    // Return the `Debris`.
     Ok(u)
 }
