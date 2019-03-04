@@ -64,4 +64,9 @@ fn main() {
     let matches = cli::check_cli();
     let inpt_file = matches.value_of("INPUT").unwrap(); // Will always have INPUT
     let sim_bodies = innout::parse_inpt(inpt_file);
+
+    for e in sim_bodies.iter() {
+        println!("what is this {}", e.type_of());
+    }
+
 }
