@@ -1,9 +1,12 @@
-
 import json
 import random
+import sys
+import getopt
 import uuid
 
 data = {"Debris": [], "Spacecraft": []}
+ref = "data/"
+
 
 
 def randNum() -> float:
@@ -36,13 +39,41 @@ def create_debris() -> dict:
     return debris
 
 
-for i in range(100):
-    data["Debris"].append(create_debris())
-    data["Spacecraft"].append(create_spacecraft())
+def main(argv):
+
+    output_file = ''
+    debris_num = 0
+    spacecraft_num = 0
+
+    try:
+        opts, args = getopt.getopt(argv, "hd:s:o:")
+    except getopt.GetoptError:
+        print('generate.py -h <help> -d <number of debris> -s <number of spacecraft> -o <output file name>')
+        sys.exit(2)
+    for opt, arg in opts:
+        if opt == '-h':
+            print('generate.py -h <help> -d <number of debris> -s <number of spacecraft> -o <output file name>')
+            sys.exit()
+        elif opt in "-d":
+            debris_num = int(arg)
+        elif opt in "-s":
+            spacecraft_num = int(arg)
+        elif opt in "-o":
+            output_file = arg
+
+    for _ in range(debris_num):
+        data["Debris"].append(create_debris())
+
+    for _ in range(spacecraft_num):
+        data["Spacecraft"].append(create_spacecraft())
+
+    if output_file == '':
+        with open(ref + "test_input.json", "w") as write_file:
+            json.dump(data, write_file)
+    else:
+        with open(ref + output_file, "w") as write_file:
+            json.dump(data, write_file)
 
 
-ref = "data/"
-
-with open(ref + "test_input.json", "w") as write_file:
-    json.dump(data, write_file)
-
+if __name__ == '__main__':
+    main(sys.argv[1:])
