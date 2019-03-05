@@ -1,7 +1,7 @@
 extern crate serde_json;
 
 use super::bodies;
-use crate::bodies::{SimobjT, Debris, Simobj, Objects};
+//use crate::bodies::{SimobjT, Debris, Simobj, Objects};
 
 use std::error::Error;
 use std::fs::File;
@@ -32,7 +32,7 @@ pub fn parse_inpt(file: &str) -> Vec<bodies::SimobjT>{
     return sim_bodies;
 }
 
-fn read_object_from_file<P: AsRef<Path>>(path: P) -> Result<Objects, Box<Error>> {
+fn read_object_from_file<P: AsRef<Path>>(path: P) -> Result<bodies::Objects, Box<Error>> {
     // Open the file in read-only mode with buffer.
     let file = File::open(path)?;
     let reader = BufReader::new(file);
