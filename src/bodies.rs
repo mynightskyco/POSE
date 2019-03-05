@@ -41,9 +41,7 @@ impl Simobj for Spacecraft {
     fn type_of(&self) -> String {
         return String::from("Spacecraft");
     }
-    fn get_id(&self) -> u32 {
-        return self.id;
-    }
+    fn get_id(&self) -> u32 { return self.id; }
 }
 /// Struct for holding attributes relating to debris
 #[derive(Serialize, Deserialize, Clone)]
