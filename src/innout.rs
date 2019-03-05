@@ -14,9 +14,9 @@ use std::path::Path;
 pub fn parse_inpt(file: &str) -> Vec<bodies::SimobjT>{
     let mut sim_bodies: Vec<bodies::SimobjT> = Vec::new();
 
-    let ser_objs = read_object_from_file("data/test_input.json").unwrap();
+    let ser_objs = read_object_from_file(file).unwrap();
 
-    //Proof of what the objects are
+    //add objects to sim_bodies
     for elem in ser_objs.Debris {
         //println!("id {}", elem.type_of());
         let p = Box::new(elem.clone());

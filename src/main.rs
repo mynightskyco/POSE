@@ -2,6 +2,8 @@
 extern crate serde_json;
 extern crate clap;
 
+use crate::bodies::{Spacecraft, Simobj, Debris};
+
 mod innout;
 mod bodies;
 
@@ -66,7 +68,7 @@ fn main() {
     let sim_bodies = innout::parse_inpt(inpt_file);
 
     for e in sim_bodies.iter() {
-        println!("what is this {}", e.type_of());
+        println!("{} with id {}", e.type_of(), e.get_id());
     }
 
 }

@@ -2,15 +2,27 @@ use serde::{Deserialize, Serialize, Serializer};
 
 pub type SimobjT = Box<dyn Simobj>;
 
-
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Objects {
     pub Debris: Vec<Debris>,
     pub Spacecraft: Vec<Spacecraft>
 }
 
+pub enum Solarobj{
+    Sun,
+    Mercury,
+    Venus,
+    Earth,
+    Mars,
+    Jupiter,
+    Saturn,
+    Uranus,
+    Neptune
+}
+
 pub trait Simobj {
     fn type_of(&self) -> String;
+    fn get_id(&self) -> u32;
 }
 
 #[derive(Serialize, Deserialize, Clone)]
@@ -28,6 +40,9 @@ pub struct Spacecraft{
 impl Simobj for Spacecraft {
     fn type_of(&self) -> String {
         return String::from("Spacecraft");
+    }
+    fn get_id(&self) -> u32 {
+        return self.id;
     }
 }
 /// Struct for holding attributes relating to debris
@@ -47,18 +62,9 @@ impl Simobj for Debris {
     fn type_of(&self) -> String {
         return String::from("Debris");
     }
-}
-
-pub enum Solarobj{
-    Sun,
-    Mercury,
-    Venus,
-    Earth,
-    Mars,
-    Jupiter,
-    Saturn,
-    Uranus,
-    Neptune
+    fn get_id(&self) -> u32 {
+        return self.id;
+    }
 }
 
 pub struct LargeBody{
