@@ -2,7 +2,7 @@
 extern crate serde_json;
 extern crate clap;
 
-use crate::bodies::{Spacecraft, Simobj, Debris};
+//use crate::bodies::{Spacecraft, Simobj, Debris};
 
 mod innout;
 mod bodies;
