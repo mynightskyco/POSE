@@ -17,12 +17,12 @@ pub fn parse_inpt(file: &str) -> Vec<bodies::SimobjT>{
     let ser_objs = read_object_from_file(file).unwrap();
 
     //add objects to sim_bodies
-    for elem in ser_objs.Debris {
+    for elem in ser_objs.debris {
         //println!("id {}", elem.type_of());
         let p = Box::new(elem.clone());
         sim_bodies.push(p);
     }
-    for elem in ser_objs.Spacecraft {
+    for elem in ser_objs.spacecraft {
         //println!("id {}", elem.type_of());
         let p = Box::new(elem.clone());
         sim_bodies.push(p);

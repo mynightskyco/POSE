@@ -4,7 +4,7 @@ import sys
 import getopt
 import uuid
 
-data = {"Debris": [], "Spacecraft": []}
+data = {"debris": [], "spacecraft": []}
 ref = "data/"
 
 

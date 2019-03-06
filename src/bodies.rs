@@ -4,8 +4,8 @@ pub type SimobjT = Box<dyn Simobj>;
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Objects {
-    pub Debris: Vec<Debris>,
-    pub Spacecraft: Vec<Spacecraft>
+    pub debris: Vec<Debris>,
+    pub spacecraft: Vec<Spacecraft>
 }
 
 pub enum Solarobj{
