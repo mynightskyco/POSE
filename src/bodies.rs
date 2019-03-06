@@ -8,18 +8,6 @@ pub struct Objects {
     pub spacecraft: Vec<Spacecraft>
 }
 
-pub enum Solarobj{
-    Sun,
-    Mercury,
-    Venus,
-    Earth,
-    Mars,
-    Jupiter,
-    Saturn,
-    Uranus,
-    Neptune
-}
-
 pub trait Simobj {
     fn type_of(&self) -> String;
     fn get_id(&self) -> u32;
@@ -65,6 +53,12 @@ impl Simobj for Debris {
     }
 }
 
+pub enum Solarobj{
+    Sun,
+    Earth,
+    Moon,
+}
+
 pub struct LargeBody{
     pub solartype: Solarobj,
     pub mass: f64, // kg
@@ -72,8 +66,5 @@ pub struct LargeBody{
     pub radius: f64,
     pub x_dis: f64,
     pub y_dis: f64,
-    pub z_dis: f64,
-    pub x_vel: f64,
-    pub y_vel: f64,
-    pub z_vel: f64    
+    pub z_dis: f64, 
 }
