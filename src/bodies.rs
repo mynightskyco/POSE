@@ -64,7 +64,7 @@ struct SolarAttr{
     mass: f64 // kg
 }
 
-struct PlanetGeneric { // See  http://www.stjarnhimlen.se/comp/ppcomp.html#4
+struct PlanetPL { // See  http://www.stjarnhimlen.se/comp/ppcomp.html#4
     solartype: Solarobj, // Type enum of the solar obj
     n0: f32, nc: f32, // N0 = longitude of the ascending node (deg).  Nc = rate of change in deg/day
     i0: f32, ic: f32, // inclination to the ecliptic (deg)
@@ -74,7 +74,7 @@ struct PlanetGeneric { // See  http://www.stjarnhimlen.se/comp/ppcomp.html#4
     m0: f32, mc: f32  // M0 = mean anomaly  (deg) (0 at perihelion; increases uniformly with time).  Mc ("mean motion") = rate of change
 }
 
-struct CartesianCoords {
+pub struct CartesianCoords {
     xh: f64,
     yh: f64,
     zh: f64
@@ -82,6 +82,7 @@ struct CartesianCoords {
 
 mod kepler_utilities {
     use std::f32::{self, consts};
+    use super::CartesianCoords;
     
     pub fn eccentric_anomaly(e: f32, m: f32) -> f32 {
         // TODO Create macro for sin and cos degrees
@@ -97,21 +98,25 @@ mod kepler_utilities {
 
         ecc
     }
+
+    pub fn lunar_pertub(xh: f64, yh: f64, zh: f64, day: f64) -> CartesianCoords{
+
+        // TODO add petrub code
+        CartesianCoords{xh, yh, zh}
+    }
 }
 
 trait KeplerModel{
 
     fn update_ecliptic_cartesian_coords(&self, day: f32);
 
-    fn perturb(xh: f64, yh: f64, zh: f64, day: f64) -> CartesianCoords {
+    fn perturb(&self, xh: f64, yh: f64, zh: f64, day: f64) -> CartesianCoords{
 
-        // Default no perturbations are applied
-        // This can be overridden
-        return CartesianCoords{xh, yh, zh};
+        CartesianCoords{xh, yh, zh}
     }
 }
 
-impl KeplerModel for PlanetGeneric{
+impl KeplerModel for PlanetPL{
 
     fn update_ecliptic_cartesian_coords(&self, day: f32) {
         // Default impl
@@ -123,5 +128,14 @@ impl KeplerModel for PlanetGeneric{
         let i = self.i0 + (day * self.ic);
         let ecc = kepler_utilities::eccentric_anomaly(e, m_u);
 
+        // TODO finsh this function
+
+    }
+
+    fn perturb(&self, xh: f64, yh: f64, zh: f64, day: f64) -> CartesianCoords {
+        match &self.solartype {
+            Solarobj::Moon{coords, attr} => CartesianCoords{xh, yh, zh},
+            _ => CartesianCoords{xh, yh, zh}
+        }
     }
 }
