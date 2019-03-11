@@ -1,8 +1,8 @@
 
-extern crate serde_json;
-extern crate clap;
+#[macro_use]
+mod macros;
 
-//use crate::bodies::{Spacecraft, Simobj, Debris};
+extern crate clap;
 
 mod innout;
 mod bodies;
