@@ -86,10 +86,11 @@ mod kepler_utilities {
     
     pub fn eccentric_anomaly(e: f32, m: f32) -> f32 {
         // TODO Create macro for sin and cos degrees
+        let deg_from_rad = 180f32 / consts::PI;
         let mut ecc: f32 = m + (e * sin_deg!(m) * (1f32 + (e * cos_deg!(m))));
 
         loop {
-            let f: f32 = ecc - (ecc - (deg_from_rad!() * e * sin_deg!(ecc)) - m) / (1f32 - e * cos_deg!(ecc));
+            let f: f32 = ecc - (ecc - (deg_from_rad * e * sin_deg!(ecc)) - m) / (1f32 - e * cos_deg!(ecc));
             let error = (f - ecc).abs();
             ecc = f;
 

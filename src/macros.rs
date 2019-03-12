@@ -12,10 +12,3 @@ macro_rules! cos_deg {
         $x.to_radians().cos().to_degrees()
     };
 }
-
-#[macro_export]
-macro_rules! deg_from_rad {
-    () => {
-        180f32 / consts::PI
-    };
-}
