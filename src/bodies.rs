@@ -53,18 +53,18 @@ impl Simobj for Debris {
     }
 }
 
-enum Solarobj{
+pub enum Solarobj{
     Sun{coords: CartesianCoords, attr: SolarAttr},
     Earth{coords: CartesianCoords, attr: SolarAttr},
     Moon{coords: CartesianCoords, attr: SolarAttr}
 }
 
-struct SolarAttr{
+pub struct SolarAttr{
     radius: f64, // meters
     mass: f64 // kg
 }
 
-struct PlanetPL { // See  http://www.stjarnhimlen.se/comp/ppcomp.html#4
+pub struct PlanetPL { // See  http://www.stjarnhimlen.se/comp/ppcomp.html#4
     solartype: Solarobj, // Type enum of the solar obj
     n0: f32, nc: f32, // N0 = longitude of the ascending node (deg).  Nc = rate of change in deg/day
     i0: f32, ic: f32, // inclination to the ecliptic (deg)
@@ -75,9 +75,9 @@ struct PlanetPL { // See  http://www.stjarnhimlen.se/comp/ppcomp.html#4
 }
 
 pub struct CartesianCoords {
-    xh: f64,
-    yh: f64,
-    zh: f64
+    xh: f32,
+    yh: f32,
+    zh: f32
 }
 
 mod kepler_utilities {
@@ -100,7 +100,7 @@ mod kepler_utilities {
         ecc
     }
 
-    pub fn lunar_pertub(xh: f64, yh: f64, zh: f64, day: f64) -> CartesianCoords{
+    pub fn lunar_pertub(xh: f32, yh: f32, zh: f32, day: f32) -> CartesianCoords{
 
         // TODO add petrub code
         CartesianCoords{xh, yh, zh}
@@ -109,17 +109,16 @@ mod kepler_utilities {
 
 trait KeplerModel{
 
-    fn update_ecliptic_cartesian_coords(&self, day: f32);
+    fn ecliptic_cartesian_coords(&self, day: f32) -> CartesianCoords;
 
-    fn perturb(&self, xh: f64, yh: f64, zh: f64, day: f64) -> CartesianCoords{
-
+    fn perturb(&self, xh: f32, yh: f32, zh: f32, day: f32) -> CartesianCoords{
         CartesianCoords{xh, yh, zh}
     }
 }
 
 impl KeplerModel for PlanetPL{
 
-    fn update_ecliptic_cartesian_coords(&self, day: f32) {
+    fn ecliptic_cartesian_coords(&self, day: f32) -> CartesianCoords{
         // Default impl
         let a = self.a0 + (day * self.ac);
         let e = self.e0 + (day * self.ec);
@@ -129,14 +128,50 @@ impl KeplerModel for PlanetPL{
         let i = self.i0 + (day * self.ic);
         let ecc = kepler_utilities::eccentric_anomaly(e, m_u);
 
-        // TODO finsh this function
+        let xv = a * (cos_deg!(ecc) - e);
+        let yv = a * ((1.0f32 - e*e).sqrt() * sin_deg!(ecc));
 
+        let v = atan2_deg!(yv, xv); // True anomaly in degrees: the angle from perihelion of the body as seen by the Sun.
+        let r = (xv*xv + yv*yv).sqrt(); // Distance from the Sun to the planet in AU
+
+        let cos_n  = cos_deg!(n_u);
+        let sin_n  = sin_deg!(n_u);
+        let cosi  = cos_deg!(i);
+        let sini  = sin_deg!(i);
+        let cos_vw = cos_deg!(v + w);
+        let sin_vw = sin_deg!(v + w);
+    
+        // Now we are ready to calculate (unperturbed) ecliptic cartesian heliocentric coordinates.
+        let xh = r * (cos_n * cos_vw - sin_n * sin_vw * cosi);
+        let yh = r * (sin_n * cos_vw + cos_n * sin_vw * cosi);
+        let zh = r * sin_vw * sini;
+
+        self.perturb(xh, yh, zh, day)
     }
 
-    fn perturb(&self, xh: f64, yh: f64, zh: f64, day: f64) -> CartesianCoords {
+    fn perturb(&self, xh: f32, yh: f32, zh: f32, day: f32) -> CartesianCoords {
         match &self.solartype {
-            Solarobj::Moon{coords, attr} => CartesianCoords{xh, yh, zh},
+            Solarobj::Moon{coords, attr} => kepler_utilities::lunar_pertub(xh, yh, zh, day),
             _ => CartesianCoords{xh, yh, zh}
         }
     }
+}
+
+// Create the sun as a PlanetPL struct
+//
+// # Return
+//      A newly crafted sun object
+pub fn make_sun() -> PlanetPL {
+    let solar_trait = Solarobj::Sun{coords: CartesianCoords{xh: 0f32, yh: 0f32, zh: 0f32}, 
+                                    attr: SolarAttr{radius: 6.95700e8, mass: 1.9891e30}};
+
+    let sun_body = PlanetPL{solartype: solar_trait,
+                            n0: 0f32, nc: 0f32,
+                            i0: 0f32, ic: 0f32,
+                            w0: 0f32, wc: 0f32, 
+                            a0: 0f32, ac: 0f32, 
+                            e0: 0f32, ec: 0f32, 
+                            m0: 0f32, mc: 0f32};
+
+    sun_body
 }

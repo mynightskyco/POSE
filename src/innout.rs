@@ -7,6 +7,7 @@ use std::error::Error;
 use std::fs::File;
 use std::io::BufReader;
 use std::path::Path;
+
 /// Main entry point into the init sequence
 /// 
 /// # Argument
