@@ -10,7 +10,7 @@ use std::path::Path;
 
 /// Main entry point into the init sequence
 /// 
-/// # Argument
+/// ## Argument
 /// * 'file' - The name of the input file containing the bodies
 pub fn parse_inpt(file: &str) -> Vec<bodies::SimobjT>{
     let mut sim_bodies: Vec<bodies::SimobjT> = Vec::new();

@@ -80,12 +80,21 @@ pub struct CartesianCoords {
     zh: f32
 }
 
+/// Provides utilities for calculating planetary bodies with a Kepler model
 mod kepler_utilities {
     use std::f32::{self, consts};
     use super::CartesianCoords;
     
+    /// Calculate the eccentric anomaly for a given body.
+    /// 
+    /// ### Arguments
+    /// * 'e' - TODO
+    /// * 'm' - TODO
+    /// 
+    /// ### Returns
+    ///      The eccentric anomaly for the provided input parameters.
     pub fn eccentric_anomaly(e: f32, m: f32) -> f32 {
-        // TODO Create macro for sin and cos degrees
+
         let deg_from_rad = 180f32 / consts::PI;
         let mut ecc: f32 = m + (e * sin_deg!(m) * (1f32 + (e * cos_deg!(m))));
 
