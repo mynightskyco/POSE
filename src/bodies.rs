@@ -74,6 +74,10 @@ pub struct PlanetPL { // See  http://www.stjarnhimlen.se/comp/ppcomp.html#4
     m0: f32, mc: f32  // M0 = mean anomaly  (deg) (0 at perihelion; increases uniformly with time).  Mc ("mean motion") = rate of change
 }
 
+pub struct Earth {
+    solartype: Solarobj
+}
+
 pub struct CartesianCoords {
     xh: f32,
     yh: f32,
@@ -163,6 +167,45 @@ impl KeplerModel for PlanetPL{
             Solarobj::Moon{coords, attr} => kepler_utilities::lunar_pertub(xh, yh, zh, day),
             _ => CartesianCoords{xh, yh, zh}
         }
+    }
+}
+
+impl KeplerModel for Earth {
+
+    /// Calculate the position of Earth relative to the Sun. 
+    /// See: http://cosinekitty.com/astronomy.js
+    /// 
+    ///  ### Arguments
+    /// * 'day' - Day as an f32
+    /// 
+    /// ### Return
+    ///     The coordinates of Earth at the provided time.
+    fn ecliptic_cartesian_coords(&self, day: f32) -> CartesianCoords {
+
+        let d = day - 1.5;
+        // Julian centuries since J2000.0
+        let t = d / 36525.0;
+        // Sun's mean longitude, in degrees
+        let l_0 = 280.46645 + (36000.76983 * t) + (0.0003032 * t * t);
+        // Sun's mean anomaly, in degrees
+        let m_0 = 357.52910 + (35999.05030 * t) - (0.0001559 * t * t) - (0.00000048 * t * t * t);
+
+        let c = // Sun's equation of center in degrees
+            (1.914600 - 0.004817 * t - 0.000014 * t * t) * sin_deg!(m_0) +
+            (0.01993 - 0.000101 * t) * sin_deg!(2f32 * m_0) +
+            0.000290 * sin_deg!(3f32 * m_0);
+        
+        let ls = l_0 + c; // true elliptical longitude of Sun
+
+         // The eccentricity of the Earth's orbit.
+        let e = 0.016708617 - t * (0.000042037 + (0.0000001236 * t));
+        // distance from Sun to Earth in astronomical units (AU)
+        let distance_in_au = (1.000001018 * (1f32 - e * e)) / (1f32 + e * cos_deg!(m_0 + c));
+        let x = -distance_in_au * cos_deg!(ls);
+        let y = -distance_in_au * sin_deg!(ls);
+
+        // the Earth's center is always on the plane of the ecliptic (z=0), by definition!
+        CartesianCoords{xh: x, yh: y, zh: 0f32}
     }
 }
 
