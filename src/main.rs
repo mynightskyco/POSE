@@ -67,8 +67,17 @@ fn main() {
     let inpt_file = matches.value_of("INPUT").unwrap(); // Will always have INPUT
     let sim_bodies = innout::parse_inpt(inpt_file);
 
+    // For testing --------------
+    let day: f32 = 1.25071; // Sat Jan 01 2000 01:01:01 GMT-0500 (EST)
+
+    let mut planet_bodies: Vec<bodies::PlanetBody> = vec!();
+    planet_bodies.push(Box::new(bodies::make_sun()));
+    planet_bodies.push(Box::new(bodies::make_earth(day)));
+
     for e in sim_bodies.iter() {
         println!("{} with id {}", e.type_of(), e.get_id());
     }
+
+    // ---------------------------
 
 }

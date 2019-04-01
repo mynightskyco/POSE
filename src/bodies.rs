@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 pub type SimobjT = Box<dyn Simobj>;
+pub type PlanetBody = Box<dyn KeplerModel>;
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Objects {
@@ -53,19 +54,23 @@ impl Simobj for Debris {
     }
 }
 
+#[derive(Debug)]
 pub enum Solarobj{
-    Sun{coords: CartesianCoords, attr: SolarAttr},
-    Earth{coords: CartesianCoords, attr: SolarAttr},
-    Moon{coords: CartesianCoords, attr: SolarAttr}
+    Sun{attr: SolarAttr},
+    Earth{attr: SolarAttr},
+    Moon{attr: SolarAttr}
 }
 
+#[derive(Debug)]
 pub struct SolarAttr{
     radius: f64, // meters
     mass: f64 // kg
 }
 
+#[derive(Debug)]
 pub struct PlanetPL { // See  http://www.stjarnhimlen.se/comp/ppcomp.html#4
     solartype: Solarobj, // Type enum of the solar obj
+    coords: CartesianCoords,
     n0: f32, nc: f32, // N0 = longitude of the ascending node (deg).  Nc = rate of change in deg/day
     i0: f32, ic: f32, // inclination to the ecliptic (deg)
     w0: f32, wc: f32, // argument of perihelion (deg)
@@ -74,10 +79,13 @@ pub struct PlanetPL { // See  http://www.stjarnhimlen.se/comp/ppcomp.html#4
     m0: f32, mc: f32  // M0 = mean anomaly  (deg) (0 at perihelion; increases uniformly with time).  Mc ("mean motion") = rate of change
 }
 
+#[derive(Debug)]
 pub struct Earth {
-    solartype: Solarobj
+    solartype: Solarobj,
+    coords: CartesianCoords
 }
 
+#[derive(Debug)]
 pub struct CartesianCoords {
     xh: f32,
     yh: f32,
@@ -120,7 +128,7 @@ mod kepler_utilities {
     }
 }
 
-trait KeplerModel{
+pub trait KeplerModel{
 
     fn ecliptic_cartesian_coords(&self, day: f32) -> CartesianCoords;
 
@@ -164,7 +172,7 @@ impl KeplerModel for PlanetPL{
 
     fn perturb(&self, xh: f32, yh: f32, zh: f32, day: f32) -> CartesianCoords {
         match &self.solartype {
-            Solarobj::Moon{coords, attr} => kepler_utilities::lunar_pertub(xh, yh, zh, day),
+            Solarobj::Moon{attr} => kepler_utilities::lunar_pertub(xh, yh, zh, day),
             _ => CartesianCoords{xh, yh, zh}
         }
     }
@@ -214,10 +222,11 @@ impl KeplerModel for Earth {
 // # Return
 //      A newly crafted sun object
 pub fn make_sun() -> PlanetPL {
-    let solar_trait = Solarobj::Sun{coords: CartesianCoords{xh: 0f32, yh: 0f32, zh: 0f32}, 
-                                    attr: SolarAttr{radius: 6.95700e8, mass: 1.9891e30}};
+
+    let solar_trait = Solarobj::Sun{attr: SolarAttr{radius: 6.95700e8, mass: 1.9891e30}};
 
     let sun_body = PlanetPL{solartype: solar_trait,
+                            coords: CartesianCoords{xh: 0f32, yh: 0f32, zh: 0f32},
                             n0: 0f32, nc: 0f32,
                             i0: 0f32, ic: 0f32,
                             w0: 0f32, wc: 0f32, 
@@ -226,4 +235,16 @@ pub fn make_sun() -> PlanetPL {
                             m0: 0f32, mc: 0f32};
 
     sun_body
+}
+
+pub fn make_earth(day: f32) -> Earth {
+
+    let solar_trait = Solarobj::Earth{attr: SolarAttr{radius: 6.3781e6, mass: 5.9722e24}};
+
+    let mut earth_body = Earth{solartype: solar_trait,
+                           coords: CartesianCoords{xh: 0f32, yh: 0f32, zh: 0f32}};
+
+    earth_body.coords = earth_body.ecliptic_cartesian_coords(day);
+
+    earth_body
 }
