@@ -239,6 +239,9 @@ pub fn make_sun() -> PlanetPL {
 
 pub fn make_earth(day: f32) -> Earth {
 
+    // Completely not allowed 
+    if day < 0f32 {panic!("Provided day value is below 0.")}
+
     let solar_trait = Solarobj::Earth{attr: SolarAttr{radius: 6.3781e6, mass: 5.9722e24}};
 
     let mut earth_body = Earth{solartype: solar_trait,
