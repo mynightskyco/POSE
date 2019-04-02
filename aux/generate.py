@@ -3,10 +3,10 @@ import random
 import sys
 import getopt
 import uuid
+import datetime
 
-data = {"debris": [], "spacecraft": []}
+data = {"date": "", "debris": [], "spacecraft": []}
 ref = "data/"
-
 
 
 def randNum() -> float:
@@ -61,11 +61,13 @@ def main(argv):
         elif opt in "-o":
             output_file = arg
 
+    data["date"] = datetime.datetime.utcnow().isoformat()
+
     for _ in range(debris_num):
-        data["Debris"].append(create_debris())
+        data["debris"].append(create_debris())
 
     for _ in range(spacecraft_num):
-        data["Spacecraft"].append(create_spacecraft())
+        data["spacecraft"].append(create_spacecraft())
 
     if output_file == '':
         with open(ref + "test_input.json", "w") as write_file:
