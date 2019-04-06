@@ -87,9 +87,22 @@ pub struct Earth {
 
 #[derive(Debug)]
 pub struct CartesianCoords {
-    xh: f32,
-    yh: f32,
-    zh: f32
+    is_meters: bool,
+    heliocentric: bool, // False if geocentric
+    xh: f32, // X location in meters
+    yh: f32, // Y location in meters
+    zh: f32  // Z location in meters
+}
+
+impl CartesianCoords {
+    fn to_meters(&mut self){
+        if !self.is_meters {
+            self.is_meters = true;
+            self.xh *= 149600000000f32;
+            self.zh *= 149600000000f32;
+            self.yh *= 149600000000f32;
+        }
+    }
 }
 
 /// Provides utilities for calculating planetary bodies with a Kepler model
@@ -97,14 +110,15 @@ mod kepler_utilities {
     use std::f32::{self, consts};
     use super::CartesianCoords;
     
-    /// Calculate the eccentric anomaly for a given body.
-    /// 
-    /// ### Arguments
-    /// * 'e' - TODO
-    /// * 'm' - TODO
-    /// 
-    /// ### Returns
-    ///      The eccentric anomaly for the provided input parameters.
+    /**
+     *  Calculate the eccentric anomaly for a given body.
+     * ### Arguments
+     * * 'e' - TODO
+     * * 'm' - TODO
+     * 
+     * ### Returns
+     *      The eccentric anomaly for the provided input parameters.
+     */
     pub fn eccentric_anomaly(e: f32, m: f32) -> f32 {
 
         let deg_from_rad = 180f32 / consts::PI;
@@ -123,23 +137,23 @@ mod kepler_utilities {
 
     pub fn lunar_pertub(xh: f32, yh: f32, zh: f32, day: f32) -> CartesianCoords{
 
-        // TODO add petrub code
-        CartesianCoords{xh, yh, zh}
+        // TODO add perturb code
+        CartesianCoords{xh, yh, zh, is_meters: false, heliocentric: false}
     }
 }
 
 pub trait KeplerModel{
 
-    fn ecliptic_cartesian_coords(&self, day: f32) -> CartesianCoords;
+    fn update_ecliptic_cartesian_coords(&mut self, day: f32) -> ();
 
     fn perturb(&self, xh: f32, yh: f32, zh: f32, day: f32) -> CartesianCoords{
-        CartesianCoords{xh, yh, zh}
+        CartesianCoords{xh, yh, zh, is_meters: false, heliocentric: true}
     }
 }
 
 impl KeplerModel for PlanetPL{
 
-    fn ecliptic_cartesian_coords(&self, day: f32) -> CartesianCoords{
+    fn update_ecliptic_cartesian_coords(&mut self, day: f32) -> (){
         // Default impl
         let a = self.a0 + (day * self.ac);
         let e = self.e0 + (day * self.ec);
@@ -167,28 +181,44 @@ impl KeplerModel for PlanetPL{
         let yh = r * (sin_n * cos_vw + cos_n * sin_vw * cosi);
         let zh = r * sin_vw * sini;
 
-        self.perturb(xh, yh, zh, day)
+        self.coords = self.perturb(xh, yh, zh, day);
+        self.coords.to_meters();
     }
 
+    /**
+     * Calculates additional perturbations on top of main heliocentric position calculation.
+     * Matches PlanetPL bodies using the type enum.
+     *  
+     * ### Arguments
+     *  * 'xh' - X coord
+     *  * 'yh' - Y coord
+     *  * 'zh' - Z coord
+     *  8 'day' - Day value
+     * 
+     * ### Returns
+     *      Cartesian coords with the added perturbations.
+     */
     fn perturb(&self, xh: f32, yh: f32, zh: f32, day: f32) -> CartesianCoords {
         match &self.solartype {
             Solarobj::Moon{attr} => kepler_utilities::lunar_pertub(xh, yh, zh, day),
-            _ => CartesianCoords{xh, yh, zh}
+            _ => CartesianCoords{xh, yh, zh, is_meters: false, heliocentric: true}
         }
     }
 }
 
 impl KeplerModel for Earth {
 
-    /// Calculate the position of Earth relative to the Sun. 
-    /// See: http://cosinekitty.com/astronomy.js
-    /// 
-    ///  ### Arguments
-    /// * 'day' - Day as an f32
-    /// 
-    /// ### Return
-    ///     The coordinates of Earth at the provided time.
-    fn ecliptic_cartesian_coords(&self, day: f32) -> CartesianCoords {
+    /** 
+     * Calculate the position of Earth relative to the Sun. 
+     * See: http://cosinekitty.com/astronomy.js
+     * 
+     *  ### Arguments
+     * * 'day' - Day as an f32
+     * 
+     * ### Return
+     *     The coordinates of Earth at the provided time.
+     */
+    fn update_ecliptic_cartesian_coords(&mut self, day: f32) -> () {
 
         let d = day - 1.5;
         // Julian centuries since J2000.0
@@ -213,20 +243,24 @@ impl KeplerModel for Earth {
         let y = -distance_in_au * sin_deg!(ls);
 
         // the Earth's center is always on the plane of the ecliptic (z=0), by definition!
-        CartesianCoords{xh: x, yh: y, zh: 0f32}
+        self.coords = CartesianCoords{xh: x, yh: y, zh: 0f32, is_meters: false, heliocentric: true};
+        self.coords.to_meters();
     }
 }
 
-// Create the sun as a PlanetPL struct
-//
-// # Return
-//      A newly crafted sun object
+/**
+ * Create the sun as a PlanetPL struct
+ *
+ * ### Return
+ *      A newly crafted sun object
+ */
 pub fn make_sun() -> PlanetPL {
 
     let solar_trait = Solarobj::Sun{attr: SolarAttr{radius: 6.95700e8, mass: 1.9891e30}};
 
     let sun_body = PlanetPL{solartype: solar_trait,
-                            coords: CartesianCoords{xh: 0f32, yh: 0f32, zh: 0f32},
+                            coords: CartesianCoords{xh: 0f32, yh: 0f32, zh: 0f32, 
+                                                    is_meters: false, heliocentric: true},
                             n0: 0f32, nc: 0f32,
                             i0: 0f32, ic: 0f32,
                             w0: 0f32, wc: 0f32, 
@@ -239,15 +273,16 @@ pub fn make_sun() -> PlanetPL {
 
 pub fn make_earth(day: f32) -> Earth {
 
-    // Completely not allowed 
+    // Completely not allowed, will cause wildly incorrect planetary calculations.
     if day < 0f32 {panic!("Provided day value is below 0.")}
 
     let solar_trait = Solarobj::Earth{attr: SolarAttr{radius: 6.3781e6, mass: 5.9722e24}};
 
     let mut earth_body = Earth{solartype: solar_trait,
-                           coords: CartesianCoords{xh: 0f32, yh: 0f32, zh: 0f32}};
+                           coords: CartesianCoords{xh: 0f32, yh: 0f32, zh: 0f32, 
+                                                   is_meters: false, heliocentric: true}};
 
-    earth_body.coords = earth_body.ecliptic_cartesian_coords(day);
+    earth_body.update_ecliptic_cartesian_coords(day);
 
     earth_body
 }

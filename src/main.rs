@@ -74,6 +74,8 @@ fn main() {
     planet_bodies.push(Box::new(bodies::make_sun()));
     planet_bodies.push(Box::new(bodies::make_earth(day)));
 
+    print!("{:#?}", bodies::make_earth(day));
+
     for e in sim_bodies.iter() {
         println!("{} with id {}", e.type_of(), e.get_id());
     }
