@@ -86,6 +86,12 @@ pub struct Earth {
 }
 
 #[derive(Debug)]
+pub struct Sun {
+    solartype: Solarobj,
+    coords: CartesianCoords
+}
+
+#[derive(Debug)]
 pub struct CartesianCoords {
     is_meters: bool,
     heliocentric: bool, // False if geocentric
@@ -101,6 +107,15 @@ impl CartesianCoords {
             self.xh *= 149600000000f32;
             self.zh *= 149600000000f32;
             self.yh *= 149600000000f32;
+        }
+    }
+
+    fn to_au(&mut self){
+        if self.is_meters {
+            self.is_meters = false;
+            self.xh /= 149600000000f32;
+            self.zh /= 149600000000f32;
+            self.yh /= 149600000000f32;
         }
     }
 }
@@ -248,25 +263,24 @@ impl KeplerModel for Earth {
     }
 }
 
+
+impl KeplerModel for Sun {
+    fn update_ecliptic_cartesian_coords(&mut self, day:f32) -> (){
+
+    }
+}
+
 /**
  * Create the sun as a PlanetPL struct
  *
  * ### Return
  *      A newly crafted sun object
  */
-pub fn make_sun() -> PlanetPL {
+pub fn make_sun() -> Sun {
 
     let solar_trait = Solarobj::Sun{attr: SolarAttr{radius: 6.95700e8, mass: 1.9891e30}};
 
-    let sun_body = PlanetPL{solartype: solar_trait,
-                            coords: CartesianCoords{xh: 0f32, yh: 0f32, zh: 0f32, 
-                                                    is_meters: false, heliocentric: true},
-                            n0: 0f32, nc: 0f32,
-                            i0: 0f32, ic: 0f32,
-                            w0: 0f32, wc: 0f32, 
-                            a0: 0f32, ac: 0f32, 
-                            e0: 0f32, ec: 0f32, 
-                            m0: 0f32, mc: 0f32};
+    let sun_body = Sun{solartype: solar_trait, coords: CartesianCoords{xh: 0f32, yh: 0f32, zh: 0f32, is_meters: true, heliocentric: true}};
 
     sun_body
 }

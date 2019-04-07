@@ -8,6 +8,7 @@ import datetime
 data = {"date": "", "debris": [], "spacecraft": []}
 ref = "data/"
 
+"""make distance respect earth's radius, make velocity believable"""
 
 def randNum() -> float:
     return random.uniform(0.0, 100.0)
