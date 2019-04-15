@@ -6,12 +6,12 @@ import uuid
 import datetime
 import math
 
-# Better Sphereical Random Point Function
+# Better Spherical Random Point Function
 
 radus_of_earth = 6378100  # in meters
 
 
-def getPoint():
+def get_point():
     u = random.random()
     v = random.random()
     theta = u * 2.0 * math.pi
@@ -56,7 +56,7 @@ def create_spacecraft() -> dict:
     # spacecraft["id"] = uuid.uuid4().int & (1 >> 32)-1
     spacecraft["id"] = random.getrandbits(32)
     rand_orbital = rand_orbit()
-    rand_x, rand_y, rand_z = getPoint()
+    rand_x, rand_y, rand_z = get_point()
     spacecraft["x_dis"] = rand_x + rand_orbital
     spacecraft["y_dis"] = rand_y + rand_orbital
     spacecraft["z_dis"] = rand_z + rand_orbital
@@ -71,7 +71,7 @@ def create_debris() -> dict:
     # debris["id"] = uuid.uuid4().int & (1 >> 32)-1
     debris["id"] = random.getrandbits(32)
     rand_orbital = rand_orbit()
-    rand_x, rand_y, rand_z = getPoint()
+    rand_x, rand_y, rand_z = get_point()
     debris["x_dis"] = rand_x + rand_orbital
     debris["y_dis"] = rand_y + rand_orbital
     debris["z_dis"] = rand_z + rand_orbital
