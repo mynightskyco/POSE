@@ -101,6 +101,9 @@ pub struct CartesianCoords {
 }
 
 impl CartesianCoords {
+    /**
+     * Converts the cartesian coords from Au to meters.
+     */
     fn to_meters(&mut self){
         if !self.is_meters {
             self.is_meters = true;
@@ -110,6 +113,9 @@ impl CartesianCoords {
         }
     }
 
+    /**
+     * Converts the cartesian coords from meters to AU.
+     */
     fn to_au(&mut self){
         if self.is_meters {
             self.is_meters = false;
@@ -265,16 +271,14 @@ impl KeplerModel for Earth {
 
 
 impl KeplerModel for Sun {
-    fn update_ecliptic_cartesian_coords(&mut self, day:f32) -> (){
-
-    }
+    fn update_ecliptic_cartesian_coords(&mut self, day:f32) -> (){}
 }
 
 /**
- * Create the sun as a PlanetPL struct
+ * Create the sun.
  *
  * ### Return
- *      A newly crafted sun object
+ *      A newly crafted sun object.
  */
 pub fn make_sun() -> Sun {
 
@@ -285,6 +289,15 @@ pub fn make_sun() -> Sun {
     sun_body
 }
 
+/**
+ * Create the earth.
+ *
+ *  ### Argument
+ * * 'day' - Day value greater than zero.
+ *
+ * ### Return
+ *      A newly created earth object.
+ */
 pub fn make_earth(day: f32) -> Earth {
 
     // Completely not allowed, will cause wildly incorrect planetary calculations.

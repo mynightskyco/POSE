@@ -9,11 +9,12 @@ mod bodies;
 
 mod cli{
 
-    /// Checks if value passed in to program argument is numeric. Returns a Result 
-    /// 
-    /// # Argument
-    /// * 'strng' - The value passed by the user
-    /// 
+    /**
+     * Checks if value passed in to program argument is numeric. Returns a Result
+     *
+     * # Argument
+     * * 'strng' - The value passed by the user
+     */
     fn numeric_validator(strng: String) -> Result<(), String>{
         if strng.parse::<f64>().is_ok(){
             Ok(())
@@ -22,9 +23,10 @@ mod cli{
         }
     }
 
-    /// Defines the argument structure for the pose simulation program
-    /// Returns the result of user arguments passed over the cli
-    /// 
+    /**
+     *  Defines the argument structure for the pose simulation program
+     *  Returns the result of user arguments passed over the cli
+     */
     pub fn check_cli() -> clap::ArgMatches<'static> {
 
         // Defines the input arguments from the cli
