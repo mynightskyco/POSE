@@ -113,9 +113,9 @@ pub struct Sun {
 pub struct CartesianCoords {
     is_meters: bool,
     heliocentric: bool, // False if geocentric
-    xh: f32, // X location in meters
-    yh: f32, // Y location in meters
-    zh: f32  // Z location in meters
+    pub xh: f32, // X location in meters
+    pub yh: f32, // Y location in meters
+    pub zh: f32  // Z location in meters
 }
 
 impl CartesianCoords {
@@ -168,7 +168,7 @@ mod kepler_utilities {
             let error = (f - ecc).abs();
             ecc = f;
 
-            if error < 1.0e-8 { break; }
+            if error < 1.0e-2 { break; }
         };
 
         ecc
@@ -280,6 +280,10 @@ pub trait KeplerModel{
 
     fn perihelion(&self, day: f32) -> f32;
 
+    fn get_coords(&self) -> &CartesianCoords;
+
+    fn mut_coords(&mut self) -> &mut CartesianCoords;
+
 }
 
 impl KeplerModel for PlanetPS{
@@ -348,6 +352,14 @@ impl KeplerModel for PlanetPS{
         self.w0 + (day * self.wc)
     }
 
+    fn get_coords(&self) -> &CartesianCoords {
+        &self.coords
+    }
+
+    fn mut_coords(&mut self) -> &mut CartesianCoords {
+        &mut self.coords
+    }
+
 }
 
 impl KeplerModel for Earth {
@@ -403,6 +415,14 @@ impl KeplerModel for Earth {
     fn perihelion(&self, day: f32) -> f32 {
         0f32
     }
+
+    fn get_coords(&self) -> &CartesianCoords {
+        &self.coords
+    }
+
+    fn mut_coords(&mut self) -> &mut CartesianCoords {
+        &mut self.coords
+    }
 }
 
 
@@ -423,6 +443,14 @@ impl KeplerModel for Sun {
     fn perihelion(&self, day: f32) -> f32 {
         0f32
     }
+
+    fn get_coords(&self) -> &CartesianCoords {
+        &self.coords
+    }
+
+    fn mut_coords(&mut self) -> &mut CartesianCoords {
+        &mut self.coords
+    }
 }
 
 /**
@@ -431,7 +459,7 @@ impl KeplerModel for Sun {
  * ### Return
  *      A newly crafted sun object.
  */
-pub fn make_sun() -> Sun {
+fn make_sun() -> Sun {
 
     let solar_trait = Solarobj::Sun{attr: SolarAttr{radius: 6.95700e8, mass: 1.9891e30}};
 
@@ -449,7 +477,7 @@ pub fn make_sun() -> Sun {
  * ### Return
  *      A newly created earth object.
  */
-pub fn make_earth(day: f32) -> Earth {
+fn make_earth(day: f32) -> Earth {
 
     // Completely not allowed, will cause wildly incorrect planetary calculations.
     if day < 0f32 {panic!("Provided day value is below 0.")}
@@ -474,7 +502,7 @@ pub fn make_earth(day: f32) -> Earth {
  * ### Return
  *      A newly created moon PlanetPS object.
  */
-pub fn make_moon(day: f32) -> PlanetPS {
+fn make_moon(day: f32) -> PlanetPS {
 
     // Completely not allowed, will cause wildly incorrect planetary calculations.
     if day < 0f32 {panic!("Provided day value is below 0.")}
@@ -500,4 +528,38 @@ pub fn make_moon(day: f32) -> PlanetPS {
     moon_body.coords = moon_body.ecliptic_cartesian_coords(day);
 
     moon_body
+}
+
+/**
+ * Creates the initial vector of solar system objects.
+ * 0 - Sun, 1 - Earth, 2 - Moon
+ *
+ * ### Argument
+ * * 'day' - The day value greater than zero. From 2000-01-01
+ *
+ * ### Return
+ *      A vector with the elements defined above.
+ */
+pub fn solar_system_objs(day: f32) -> Vec<PlanetBody> {
+    let mut solar_bodies: Vec<PlanetBody> = Vec::new();
+
+    solar_bodies.push(Box::new(make_sun()));
+    solar_bodies.push(Box::new(make_earth(day)));
+    solar_bodies.push(Box::new(make_moon(day)));
+
+    solar_bodies
+}
+
+
+/**
+ * Updates the coords for all PlanetBody objects in the provided vector.
+ *
+ * ### Argument
+ * * 'ss_objs' - PlanetBody objects to be updated.
+ */
+pub fn update_solar_system_objs(ss_objs: &mut Vec<PlanetBody>, day: f32){
+
+    for obj in ss_objs {
+        *obj.mut_coords() = obj.ecliptic_cartesian_coords(day);
+    }
 }
