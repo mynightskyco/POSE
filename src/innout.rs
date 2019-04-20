@@ -8,15 +8,14 @@ use std::fs::File;
 use std::io::BufReader;
 use std::path::Path;
 
-/**
- * Main entry point into the init sequence
- *
- * ### Argument
- * * 'file' - The name of the input file containing the bodies
- *
- * ### Return
- *      A vector of bodies from the input file.
- */
+/// Main entry point into the init sequence
+///
+/// ### Argument
+/// * 'file' - The name of the input file containing the bodies
+///
+/// ### Return
+///      A vector of bodies from the input file.
+///
 pub fn parse_inpt(file: &str) -> Vec<bodies::SimobjT>{
     let mut sim_bodies: Vec<bodies::SimobjT> = Vec::new();
 
@@ -39,17 +38,16 @@ pub fn parse_inpt(file: &str) -> Vec<bodies::SimobjT>{
     return sim_bodies;
 }
 
-/**
- * Function responsable for handling opeing the file and conneting the
- * serde reader.
- *
- * ### Argument
- * * 'path' - The path to the input bodies json file.
- *
- * ### Return
- *      A result object loaded with an IO error on failure or the serde reader on
- *      success.
- */
+/// Function responsable for handling opeing the file and conneting the
+/// serde reader.
+///
+/// ### Argument
+/// * 'path' - The path to the input bodies json file.
+///
+/// ### Return
+///      A result object loaded with an IO error on failure or the serde reader on
+///      success.
+///
 fn read_object_from_file<P: AsRef<Path>>(path: P) -> Result<bodies::Objects, Box<Error>> {
     // Open the file in read-only mode with buffer.
     let file = File::open(path)?;
@@ -62,12 +60,11 @@ fn read_object_from_file<P: AsRef<Path>>(path: P) -> Result<bodies::Objects, Box
     Ok(u)
 }
 
-/**
- * Adds an sequential id value to each of the simulation bodies.
- *
- * ### Argument
- * * 'sim_bodies' - A vector containing both debris and spacecraft objects.
- */
+/// Adds an sequential id value to each of the simulation bodies.
+///
+/// ### Argument
+/// * 'sim_bodies' - A vector containing both debris and spacecraft objects.
+///
 fn assign_id(sim_bodies: &mut Vec<bodies::SimobjT>) {
     let mut id_inc: u32 = 1;
 

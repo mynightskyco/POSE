@@ -119,9 +119,8 @@ pub struct CartesianCoords {
 }
 
 impl CartesianCoords {
-    /**
-     * Converts the cartesian coords from Au to meters.
-     */
+    
+    /// Converts the cartesian coords from Au to meters.
     fn to_meters(&mut self){
         if !self.is_meters {
             self.is_meters = true;
@@ -131,9 +130,7 @@ impl CartesianCoords {
         }
     }
 
-    /**
-     * Converts the cartesian coords from meters to AU.
-     */
+    ///Converts the cartesian coords from meters to AU.
     fn to_au(&mut self){
         if self.is_meters {
             self.is_meters = false;
@@ -149,15 +146,14 @@ mod kepler_utilities {
     use std::f32::{self, consts};
     use crate::bodies::{PlanetPS, KeplerModel, CartesianCoords, EARTH_RADII_PER_ASTRONOMICAL_UNIT};
 
-    /**
-     *  Calculate the eccentric anomaly for a given body.
-     * ### Arguments
-     * * 'e' - TODO
-     * * 'm' - TODO
-     * 
-     * ### Returns
-     *      The eccentric anomaly for the provided input parameters.
-     */
+
+    /// Calculate the eccentric anomaly for a given body.
+    /// ### Arguments
+    /// * 'e' - TODO
+    /// * 'm' - TODO
+    /// 
+    /// ### Returns
+    ///      The eccentric anomaly for the provided input parameters.
     pub fn eccentric_anomaly(e: f32, m: f32) -> f32 {
 
         let deg_from_rad = 180f32 / consts::PI;
@@ -173,32 +169,27 @@ mod kepler_utilities {
 
         ecc
     }
-
-    /**
-     * Calculates the mean anomaly for the Sun.
-     */
+    
+    /// Calculates the mean anomaly for the Sun.
     fn mean_anomaly_of_sun(day: f32) -> f32 {
         356.0470 + (0.9856002585 * day)
     }
 
-    /**
-     * Calculates the argument of perihelion for the Sun.
-     */
+
+    /// Calculates the argument of perihelion for the Sun.
     fn sun_argument_of_perihelion(day: f32) -> f32 {
         282.9404 + (4.70935e-5 * day)
     }
-
-    /**
-     * Calculates the ecliptic latitude and longitude for the given inputs.
-     *
-     * ### Arguments
-     * * 'xh' - Cartesian coordinate in x dimension.
-     * * 'yh' - Cartesian coordinate in y dimension.
-     * * 'zh' - Cartesian coordinate in z dimension.
-     *
-     * ### Return
-     *      The latitude and longitude as a tuple.
-     */
+    
+    /// Calculates the ecliptic latitude and longitude for the given inputs.
+    ///
+    /// ### Arguments
+    /// * 'xh' - Cartesian coordinate in x dimension.
+    /// * 'yh' - Cartesian coordinate in y dimension.
+    /// * 'zh' - Cartesian coordinate in z dimension.
+    ///
+    /// ### Return
+    ///      The latitude and longitude as a tuple.
     fn ecliptic_lat_lon(xh: f32, yh: f32, zh: f32) -> (f32, f32){
         (atan2_deg!(yh, xh), atan2_deg!(zh, (xh*xh + yh*yh).sqrt()))
     }
@@ -319,20 +310,19 @@ impl KeplerModel for PlanetPS{
         let mut coords = self.perturb(xh, yh, zh, day);
         coords
     }
-
-    /**
-     * Calculates additional perturbations on top of main heliocentric position calculation.
-     * Matches PlanetPS bodies using the type enum.
-     *  
-     * ### Arguments
-     *  * 'xh' - X coord
-     *  * 'yh' - Y coord
-     *  * 'zh' - Z coord
-     *  8 'day' - Day value
-     * 
-     * ### Returns
-     *      Cartesian coords with the added perturbations.
-     */
+    
+    /// Calculates additional perturbations on top of main heliocentric position calculation.
+    /// Matches PlanetPS bodies using the type enum.
+    ///  
+    /// ### Arguments
+    ///  * 'xh' - X coord
+    ///  * 'yh' - Y coord
+    ///  * 'zh' - Z coord
+    ///  8 'day' - Day value
+    /// 
+    /// ### Returns
+    ///      Cartesian coords with the added perturbations.
+    /// 
     fn perturb(&self, xh: f32, yh: f32, zh: f32, day: f32) -> CartesianCoords {
         match &self.solartype {
             Solarobj::Moon{attr} => kepler_utilities::lunar_pertub(self, xh, yh, zh, day),
@@ -363,17 +353,15 @@ impl KeplerModel for PlanetPS{
 }
 
 impl KeplerModel for Earth {
-
-    /** 
-     * Calculate the position of Earth relative to the Sun.
-     * Calls function earth_ecliptic_cartesian_coords in kepler_utilities
-     * 
-     *  ### Arguments
-     * * 'day' - Day as an f32
-     * 
-     * ### Return
-     *     The coordinates of Earth at the provided time.
-     */
+    
+    /// Calculate the position of Earth relative to the Sun.
+    /// Calls function earth_ecliptic_cartesian_coords in kepler_utilities
+    /// 
+    ///  ### Arguments
+    /// * 'day' - Day as an f32
+    /// 
+    /// ### Return
+    ///     The coordinates of Earth at the provided time.
     fn ecliptic_cartesian_coords(&self, day: f32) -> CartesianCoords {
 
         let d = day - 1.5;
@@ -453,12 +441,10 @@ impl KeplerModel for Sun {
     }
 }
 
-/**
- * Create the sun.
- *
- * ### Return
- *      A newly crafted sun object.
- */
+///  Create the sun.
+/// 
+///  ### Return
+///       A newly crafted sun object.
 fn make_sun() -> Sun {
 
     let solar_trait = Solarobj::Sun{attr: SolarAttr{radius: 6.95700e8, mass: 1.9891e30}};
@@ -468,15 +454,14 @@ fn make_sun() -> Sun {
     sun_body
 }
 
-/**
- * Create the earth.
- *
- *  ### Argument
- * * 'day' - Day value greater than zero.
- *
- * ### Return
- *      A newly created earth object.
- */
+/// Create the earth.
+///
+/// ### Argument
+/// * 'day' - Day value greater than zero.
+///
+/// ### Return
+///      A newly created earth object.
+///
 fn make_earth(day: f32) -> Earth {
 
     // Completely not allowed, will cause wildly incorrect planetary calculations.
@@ -493,15 +478,14 @@ fn make_earth(day: f32) -> Earth {
     earth_body
 }
 
-/**
- * Create the moon, geocentric.
- *
- *  ### Argument
- * * 'day' - Day value greater than zero.
- *
- * ### Return
- *      A newly created moon PlanetPS object.
- */
+/// Create the moon, geocentric.
+///
+/// ### Argument
+/// * 'day' - Day value greater than zero.
+///
+/// ### Return
+///     A newly created moon PlanetPS object.
+///
 fn make_moon(day: f32) -> PlanetPS {
 
     // Completely not allowed, will cause wildly incorrect planetary calculations.
@@ -530,16 +514,15 @@ fn make_moon(day: f32) -> PlanetPS {
     moon_body
 }
 
-/**
- * Creates the initial vector of solar system objects.
- * 0 - Sun, 1 - Earth, 2 - Moon
- *
- * ### Argument
- * * 'day' - The day value greater than zero. From 2000-01-01
- *
- * ### Return
- *      A vector with the elements defined above.
- */
+/// Creates the initial vector of solar system objects.
+/// 0 - Sun, 1 - Earth, 2 - Moon
+///
+/// ### Argument
+/// * 'day' - The day value greater than zero. From 2000-01-01
+///
+/// ### Return
+///      A vector with the elements defined above.
+///
 pub fn solar_system_objs(day: f32) -> Vec<PlanetBody> {
     let mut solar_bodies: Vec<PlanetBody> = Vec::new();
 
@@ -550,13 +533,11 @@ pub fn solar_system_objs(day: f32) -> Vec<PlanetBody> {
     solar_bodies
 }
 
-
-/**
- * Updates the coords for all PlanetBody objects in the provided vector.
- *
- * ### Argument
- * * 'ss_objs' - PlanetBody objects to be updated.
- */
+/// Updates the coords for all PlanetBody objects in the provided vector.
+///
+/// ### Argument
+/// * 'ss_objs' - PlanetBody objects to be updated.
+///
 pub fn update_solar_system_objs(ss_objs: &mut Vec<PlanetBody>, day: f32){
 
     for obj in ss_objs {
