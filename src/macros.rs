@@ -16,6 +16,6 @@ macro_rules! cos_deg {
 #[macro_export]
 macro_rules! atan2_deg {
     ($x : expr, $y : expr) => {
-        $x.to_radians().atan2($y.to_radians())
+        $x.atan2($y).to_degrees()
     };
 }

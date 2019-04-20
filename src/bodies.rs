@@ -1,5 +1,12 @@
 use serde::{Deserialize, Serialize};
 
+
+const METERS_PER_ASTRONOMICAL_UNIT: f32 = 1.4959787e+11;
+const METERS_PER_EARTH_EQUATORIAL_RADIUS: f32 = 6378140.0;
+const EARTH_RADII_PER_ASTRONOMICAL_UNIT: f32 =
+    METERS_PER_ASTRONOMICAL_UNIT / METERS_PER_EARTH_EQUATORIAL_RADIUS;      // 23454.78
+
+
 pub type SimobjT = Box<dyn Simobj>;
 pub type PlanetBody = Box<dyn KeplerModel>;
 
@@ -76,7 +83,11 @@ pub struct PlanetPL { // See  http://www.stjarnhimlen.se/comp/ppcomp.html#4
     w0: f32, wc: f32, // argument of perihelion (deg)
     a0: f32, ac: f32, // semi-major axis, or mean distance from Sun (AU)
     e0: f32, ec: f32, // eccentricity (0=circle, 0..1=ellipse, 1=parabola)
-    m0: f32, mc: f32  // M0 = mean anomaly  (deg) (0 at perihelion; increases uniformly with time).  Mc ("mean motion") = rate of change
+    m0: f32, mc: f32, // M0 = mean anomaly  (deg) (0 at perihelion; increases uniformly with time).  Mc ("mean motion") = rate of change
+    mag_base: f32,
+    mag_phase_factor: f32,
+    mag_nonlinear_factor: f32,
+    mag_nonlinear_exponent: f32
 }
 
 #[derive(Debug)]
@@ -129,8 +140,7 @@ impl CartesianCoords {
 /// Provides utilities for calculating planetary bodies with a Kepler model
 mod kepler_utilities {
     use std::f32::{self, consts};
-    use super::CartesianCoords;
-    use crate::bodies::{PlanetPL, KeplerModel};
+    use crate::bodies::{PlanetPL, KeplerModel, CartesianCoords, EARTH_RADII_PER_ASTRONOMICAL_UNIT};
 
     /**
      *  Calculate the eccentric anomaly for a given body.
@@ -227,14 +237,24 @@ mod kepler_utilities {
             0.46 * cos_deg! (2f32*d)
         ;
 
-        let (latecl, lonecl) = ecliptic_lat_lon(xh, yh, zh);
+        let (mut lonecl, mut latecl) = ecliptic_lat_lon(xh, yh, zh);
 
-        let r = (xh*xh + yh*yh + zh*zh).sqrt();
+        let mut r = (xh*xh + yh*yh + zh*zh).sqrt();
 
+        lonecl += delta_long;
+        latecl += delta_lat;
+        r += delta_radius / EARTH_RADII_PER_ASTRONOMICAL_UNIT;
 
+        let coslon = cos_deg! (lonecl);
+        let sinlon = sin_deg! (lonecl);
+        let coslat = cos_deg! (latecl);
+        let sinlat = sin_deg! (latecl);
 
-        // TODO add perturb code
-        CartesianCoords{xh, yh, zh, is_meters: false, heliocentric: false}
+        let xp = r * coslon * coslat;
+        let yp = r * sinlon * coslat;
+        let zp = r * sinlat;
+
+        CartesianCoords{xh: xp, yh: yp, zh: zp, is_meters: false, heliocentric: false}
     }
 
 }
@@ -436,4 +456,32 @@ pub fn make_earth(day: f32) -> Earth {
     earth_body.coords = earth_body.ecliptic_cartesian_coords(day);
 
     earth_body
+}
+
+pub fn make_moon(day: f32) -> PlanetPL {
+
+    // Completely not allowed, will cause wildly incorrect planetary calculations.
+    if day < 0f32 {panic!("Provided day value is below 0.")}
+
+    let solar_trait = Solarobj::Moon {attr: SolarAttr{radius: 1738.1, mass: 0.07346e24}};
+
+    let mut moon_body = PlanetPL{
+        solartype: solar_trait,
+        coords: CartesianCoords{xh: 0f32, yh: 0f32, zh: 0f32, is_meters: false, heliocentric: false},
+        n0: 125.1228,   nc: -0.0529538083,
+        i0: 5.1454,     ic: 0.0,
+        w0: 318.0634,   wc: 0.1643573223,
+        a0: 60.2666 / EARTH_RADII_PER_ASTRONOMICAL_UNIT,
+        ac: 0.0,
+        e0: 0.054900,   ec: 0.0,
+        m0: 115.3654,   mc: 13.0649929509,
+        mag_base: 0.23,
+        mag_phase_factor: 0.026,
+        mag_nonlinear_factor: 4.0e-9,
+        mag_nonlinear_exponent: 4f32
+    };
+
+    moon_body.coords = moon_body.ecliptic_cartesian_coords(day);
+
+    moon_body
 }

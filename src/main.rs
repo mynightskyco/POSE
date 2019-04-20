@@ -78,6 +78,7 @@ fn main() {
 
     print!("{:#?}", bodies::make_earth(day));
     print!("{:#?}", bodies::make_sun());
+    print!("{:#?}", bodies::make_moon(day));
 
     for e in sim_bodies.iter() {
         println!("{} with id {}", e.type_of(), e.get_id());
