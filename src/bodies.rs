@@ -19,17 +19,19 @@ pub struct Objects {
 pub trait Simobj {
     fn type_of(&self) -> String;
     fn get_id(&self) -> u32;
+    fn id_mut(&mut self) -> &mut u32;
 }
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Spacecraft{
-    pub id: u32,
-    pub x_dis: f64,
-    pub y_dis: f64,
-    pub z_dis: f64,
-    pub x_vel: f64,
-    pub y_vel: f64,
-    pub z_vel: f64
+    #[serde(skip)]
+    id: u32,
+    x_dis: f64,
+    y_dis: f64,
+    z_dis: f64,
+    x_vel: f64,
+    y_vel: f64,
+    z_vel: f64
     // Add more
 }
 
@@ -37,18 +39,22 @@ impl Simobj for Spacecraft {
     fn type_of(&self) -> String {
         return String::from("Spacecraft");
     }
-    fn get_id(&self) -> u32 { return self.id; }
+    fn get_id(&self) -> u32 { self.id }
+
+    fn id_mut(&mut self) -> &mut u32 {&mut self.id}
 }
+
 /// Struct for holding attributes relating to debris
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Debris{
-    pub id: u32,
-    pub x_dis: f64,
-    pub y_dis: f64,
-    pub z_dis: f64,
-    pub x_vel: f64,
-    pub y_vel: f64,
-    pub z_vel: f64
+    #[serde(skip)]
+    id: u32,
+    x_dis: f64,
+    y_dis: f64,
+    z_dis: f64,
+    x_vel: f64,
+    y_vel: f64,
+    z_vel: f64
     // Add more
 }
 
@@ -56,9 +62,10 @@ impl Simobj for Debris {
     fn type_of(&self) -> String {
         return String::from("Debris");
     }
-    fn get_id(&self) -> u32 {
-        return self.id;
-    }
+
+    fn get_id(&self) -> u32 { self.id }
+
+    fn id_mut(&mut self) -> &mut u32 {&mut self.id}
 }
 
 #[derive(Debug)]
@@ -75,7 +82,7 @@ pub struct SolarAttr{
 }
 
 #[derive(Debug)]
-pub struct PlanetPL { // See  http://www.stjarnhimlen.se/comp/ppcomp.html#4
+pub struct PlanetPS { // See  http://www.stjarnhimlen.se/comp/ppcomp.html#4
     solartype: Solarobj, // Type enum of the solar obj
     coords: CartesianCoords,
     n0: f32, nc: f32, // N0 = longitude of the ascending node (deg).  Nc = rate of change in deg/day
@@ -140,7 +147,7 @@ impl CartesianCoords {
 /// Provides utilities for calculating planetary bodies with a Kepler model
 mod kepler_utilities {
     use std::f32::{self, consts};
-    use crate::bodies::{PlanetPL, KeplerModel, CartesianCoords, EARTH_RADII_PER_ASTRONOMICAL_UNIT};
+    use crate::bodies::{PlanetPS, KeplerModel, CartesianCoords, EARTH_RADII_PER_ASTRONOMICAL_UNIT};
 
     /**
      *  Calculate the eccentric anomaly for a given body.
@@ -196,7 +203,7 @@ mod kepler_utilities {
         (atan2_deg!(yh, xh), atan2_deg!(zh, (xh*xh + yh*yh).sqrt()))
     }
 
-    pub fn lunar_pertub(body: &PlanetPL, xh: f32, yh: f32, zh: f32, day: f32) -> CartesianCoords{
+    pub fn lunar_pertub(body: &PlanetPS, xh: f32, yh: f32, zh: f32, day: f32) -> CartesianCoords{
         let ms = mean_anomaly_of_sun(day); // mean anomaly of Sun
         let ws = sun_argument_of_perihelion(day); // Sun's argument of perihelion
         let ls = ms + ws; // mean longitude of Sun
@@ -275,7 +282,7 @@ pub trait KeplerModel{
 
 }
 
-impl KeplerModel for PlanetPL{
+impl KeplerModel for PlanetPS{
 
     fn ecliptic_cartesian_coords(&self, day: f32) -> CartesianCoords {
         // Default impl
@@ -311,7 +318,7 @@ impl KeplerModel for PlanetPL{
 
     /**
      * Calculates additional perturbations on top of main heliocentric position calculation.
-     * Matches PlanetPL bodies using the type enum.
+     * Matches PlanetPS bodies using the type enum.
      *  
      * ### Arguments
      *  * 'xh' - X coord
@@ -458,14 +465,23 @@ pub fn make_earth(day: f32) -> Earth {
     earth_body
 }
 
-pub fn make_moon(day: f32) -> PlanetPL {
+/**
+ * Create the moon, geocentric.
+ *
+ *  ### Argument
+ * * 'day' - Day value greater than zero.
+ *
+ * ### Return
+ *      A newly created moon PlanetPS object.
+ */
+pub fn make_moon(day: f32) -> PlanetPS {
 
     // Completely not allowed, will cause wildly incorrect planetary calculations.
     if day < 0f32 {panic!("Provided day value is below 0.")}
 
     let solar_trait = Solarobj::Moon {attr: SolarAttr{radius: 1738.1, mass: 0.07346e24}};
 
-    let mut moon_body = PlanetPL{
+    let mut moon_body = PlanetPS{
         solartype: solar_trait,
         coords: CartesianCoords{xh: 0f32, yh: 0f32, zh: 0f32, is_meters: false, heliocentric: false},
         n0: 125.1228,   nc: -0.0529538083,

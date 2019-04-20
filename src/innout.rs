@@ -34,6 +34,7 @@ pub fn parse_inpt(file: &str) -> Vec<bodies::SimobjT>{
         sim_bodies.push(p);
     }
 
+    assign_id(&mut sim_bodies);
 
     return sim_bodies;
 }
@@ -59,4 +60,19 @@ fn read_object_from_file<P: AsRef<Path>>(path: P) -> Result<bodies::Objects, Box
 
     // Return the `Objects`.
     Ok(u)
+}
+
+/**
+ * Adds an sequential id value to each of the simulation bodies.
+ *
+ * ### Argument
+ * * 'sim_bodies' - A vector containing both debris and spacecraft objects.
+ */
+fn assign_id(sim_bodies: &mut Vec<bodies::SimobjT>) {
+    let mut id_inc: u32 = 1;
+
+    for body in sim_bodies {
+        *body.id_mut() = id_inc;
+        id_inc += 1;
+    }
 }
