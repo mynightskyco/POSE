@@ -158,50 +158,32 @@ mod kepler_utilities {
     }
 
     /**
-     * Calculate the position of Earth relative to the Sun.
-     * See: http://cosinekitty.com/astronomy.js
-     *
-     *  ### Arguments
-     * * 'day' - Day as an f32
-     *
-     * ### Return
-     *     The coordinates of Earth at the provided time.
+     * Calculates the mean anomaly for the Sun.
      */
-    pub fn earth_ecliptic_cartesian_coords(day: f32) -> CartesianCoords {
-        let d = day - 1.5;
-        // Julian centuries since J2000.0
-        let t = d / 36525.0;
-        // Sun's mean longitude, in degrees
-        let l_0 = 280.46645 + (36000.76983 * t) + (0.0003032 * t * t);
-        // Sun's mean anomaly, in degrees
-        let m_0 = 357.52910 + (35999.05030 * t) - (0.0001559 * t * t) - (0.00000048 * t * t * t);
-
-        let c = // Sun's equation of center in degrees
-            (1.914600 - 0.004817 * t - 0.000014 * t * t) * sin_deg!(m_0) +
-                (0.01993 - 0.000101 * t) * sin_deg!(2f32 * m_0) +
-                0.000290 * sin_deg!(3f32 * m_0);
-
-        let ls = l_0 + c; // true elliptical longitude of Sun
-
-        // The eccentricity of the Earth's orbit.
-        let e = 0.016708617 - t * (0.000042037 + (0.0000001236 * t));
-        // distance from Sun to Earth in astronomical units (AU)
-        let distance_in_au = (1.000001018 * (1f32 - e * e)) / (1f32 + e * cos_deg!(m_0 + c));
-        let x = -distance_in_au * cos_deg!(ls);
-        let y = -distance_in_au * sin_deg!(ls);
-
-        // the Earth's center is always on the plane of the ecliptic (z=0), by definition!
-        let mut coords = CartesianCoords { xh: x, yh: y, zh: 0f32, is_meters: false, heliocentric: true };
-
-        coords
-    }
-
     fn mean_anomaly_of_sun(day: f32) -> f32 {
         356.0470 + (0.9856002585 * day)
     }
 
+    /**
+     * Calculates the argument of perihelion for the Sun.
+     */
     fn sun_argument_of_perihelion(day: f32) -> f32 {
         282.9404 + (4.70935e-5 * day)
+    }
+
+    /**
+     * Calculates the ecliptic latitude and longitude for the given inputs.
+     *
+     * ### Arguments
+     * * 'xh' - Cartesian coordinate in x dimension.
+     * * 'yh' - Cartesian coordinate in y dimension.
+     * * 'zh' - Cartesian coordinate in z dimension.
+     *
+     * ### Return
+     *      The latitude and longitude as a tuple.
+     */
+    fn ecliptic_lat_lon(xh: f32, yh: f32, zh: f32) -> (f32, f32){
+        (atan2_deg!(yh, xh), atan2_deg!(zh, (xh*xh + yh*yh).sqrt()))
     }
 
     pub fn lunar_pertub(body: &PlanetPL, xh: f32, yh: f32, zh: f32, day: f32) -> CartesianCoords{
@@ -218,7 +200,7 @@ mod kepler_utilities {
         let f = lm - nm; // argument of latitude for the Moon
 
         let delta_long =
-            -1.274 * sin_deg!(mm - 2f32*d)      +   // the Evection
+           -1.274 * sin_deg!(mm - 2f32*d)       +   // the Evection
             0.658 * sin_deg!(2f32*d)            -   // the Variation
             0.186 * sin_deg!(ms)                -   // the Yearly Equation
             0.059 * sin_deg!(2f32*mm - 2f32*d)  -
@@ -231,6 +213,25 @@ mod kepler_utilities {
             0.015 * sin_deg!(2f32*f - 2f32*d)   +
             0.011 * sin_deg!(mm - 4f32*d)
         ;
+
+        let delta_lat =
+           -0.173 * sin_deg!(f - 2f32*d)        -
+            0.055 * sin_deg!(mm - f - 2f32*d)   -
+            0.046 * sin_deg!(mm + f - 2f32*d)   +
+            0.033 * sin_deg!(f + 2f32*d)        +
+            0.017 * sin_deg!(2f32*mm + f)
+        ;
+
+        let delta_radius =
+           -0.58 * cos_deg! (mm - 2f32*d)       -
+            0.46 * cos_deg! (2f32*d)
+        ;
+
+        let (latecl, lonecl) = ecliptic_lat_lon(xh, yh, zh);
+
+        let r = (xh*xh + yh*yh + zh*zh).sqrt();
+
+
 
         // TODO add perturb code
         CartesianCoords{xh, yh, zh, is_meters: false, heliocentric: false}
@@ -251,6 +252,7 @@ pub trait KeplerModel{
     fn node_longitude(&self, day: f32) -> f32;
 
     fn perihelion(&self, day: f32) -> f32;
+
 }
 
 impl KeplerModel for PlanetPL{
@@ -284,16 +286,6 @@ impl KeplerModel for PlanetPL{
         let zh = r * sin_vw * sini;
 
         let mut coords = self.perturb(xh, yh, zh, day);
-
-        // Handle special cases
-        match &self.solartype {
-            Solarobj::Moon{attr} => {
-                let earth_coords = kepler_utilities::earth_ecliptic_cartesian_coords(day);
-                // TODO Add coords and earth_coords
-            },
-            _ => {}
-        }
-
         coords
     }
 
@@ -345,7 +337,32 @@ impl KeplerModel for Earth {
      */
     fn ecliptic_cartesian_coords(&self, day: f32) -> CartesianCoords {
 
-        kepler_utilities::earth_ecliptic_cartesian_coords(day)
+        let d = day - 1.5;
+        // Julian centuries since J2000.0
+        let t = d / 36525.0;
+        // Sun's mean longitude, in degrees
+        let l_0 = 280.46645 + (36000.76983 * t) + (0.0003032 * t * t);
+        // Sun's mean anomaly, in degrees
+        let m_0 = 357.52910 + (35999.05030 * t) - (0.0001559 * t * t) - (0.00000048 * t * t * t);
+
+        let c = // Sun's equation of center in degrees
+            (1.914600 - 0.004817 * t - 0.000014 * t * t) * sin_deg!(m_0) +
+                (0.01993 - 0.000101 * t) * sin_deg!(2f32 * m_0) +
+                0.000290 * sin_deg!(3f32 * m_0);
+
+        let ls = l_0 + c; // true elliptical longitude of Sun
+
+        // The eccentricity of the Earth's orbit.
+        let e = 0.016708617 - t * (0.000042037 + (0.0000001236 * t));
+        // distance from Sun to Earth in astronomical units (AU)
+        let distance_in_au = (1.000001018 * (1f32 - e * e)) / (1f32 + e * cos_deg!(m_0 + c));
+        let x = -distance_in_au * cos_deg!(ls);
+        let y = -distance_in_au * sin_deg!(ls);
+
+        // the Earth's center is always on the plane of the ecliptic (z=0), by definition!
+        let mut coords = CartesianCoords { xh: x, yh: y, zh: 0f32, is_meters: false, heliocentric: true };
+
+        coords
     }
 
     fn mean_anomaly(&self, day: f32) -> f32 {
