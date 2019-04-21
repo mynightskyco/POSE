@@ -6,3 +6,5 @@
 *.log
 *.gz
 .vscode
+.png
+.csv

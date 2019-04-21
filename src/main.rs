@@ -80,6 +80,9 @@ fn main() {
 
     for i in 1..366 {
         bodies::update_solar_system_objs(&mut planet_bodies, i as f32);
+        planet_bodies.get_mut(0).unwrap().mut_coords().to_meters();
+        planet_bodies.get_mut(1).unwrap().mut_coords().to_meters();
+        planet_bodies.get_mut(2).unwrap().mut_coords().to_meters();
         print!("Sun,{0},{1},{2},{3}\n",
                i,
                planet_bodies.get(0).unwrap().get_coords().xh,

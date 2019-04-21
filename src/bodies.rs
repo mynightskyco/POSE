@@ -121,7 +121,7 @@ pub struct CartesianCoords {
 impl CartesianCoords {
     
     /// Converts the cartesian coords from Au to meters.
-    fn to_meters(&mut self){
+    pub fn to_meters(&mut self){
         if !self.is_meters {
             self.is_meters = true;
             self.xh *= 149600000000f32;
@@ -131,7 +131,7 @@ impl CartesianCoords {
     }
 
     ///Converts the cartesian coords from meters to AU.
-    fn to_au(&mut self){
+    pub fn to_au(&mut self){
         if self.is_meters {
             self.is_meters = false;
             self.xh /= 149600000000f32;
